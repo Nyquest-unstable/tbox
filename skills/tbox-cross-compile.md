@@ -4,6 +4,12 @@
 
 TBOX 是一个用 C 语言实现的跨平台开发库，支持 Windows、MacOS、Linux、Android、iOS、*BSD 等平台。
 
+## 重要平台说明
+
+**关键信息：** 当前项目的目标平台(target)是ARM架构的32位平台，但编译宿主机(host)是x86_64平台。
+因此，所有编译产出的二进制文件都是针对ARM 32位架构的，不能在x86_64编译主机上直接运行。
+请勿在编译完成后尝试直接运行生成的可执行文件，因为它们不兼容当前编译主机架构。
+
 ## 交叉编译配置
 
 ### 1. 自定义工具链配置
@@ -21,7 +27,7 @@ toolchain_end()
 ### 2. 配置并编译
 
 ```bash
-# 配置交叉编译
+# 配置交叉编译，目标平台为ARM 32位
 xmake f -p linux -a arm --toolchain=myarm
 
 # 编译
@@ -39,6 +45,11 @@ xmake -r
 包含文件：
 - `libtbox.a` - 静态库
 - `demo` - 可执行文件
+
+## 关键提醒
+
+由于目标平台是ARM 32位架构，而编译宿主机是x86_64架构，编译产出的所有二进制文件都无法在当前编译主机上直接运行。
+请勿尝试在编译完成后直接运行生成的可执行文件，必须将其部署到ARM 32位目标平台上运行。
 
 ## 目标机器部署
 
@@ -66,7 +77,7 @@ xmake -r
 
 这个脚本会：
 1. 检查 target-machine 是否已挂载
-2. 重新编译项目
+2. 重新编译项目（针对ARM 32位平台）
 3. 将编译产物复制到目标机器
 
 ### 3. 手动复制文件
@@ -98,80 +109,13 @@ tbox/
 ├── xmake.lua              # 主构建配置（含自定义工具链）
 ├── mount-ftp.sh           # FTP 挂载脚本
 ├── deploy.sh              # 一键部署脚本
-├── src/                   # 源代码
-├── out/                   # 软链接输出
-├── build/linux/arm/release/  # 实际编译输出
-└── target-machine/        # 挂载的目标机器文件系统
-    ├── demo
-    └── libtbox.a
+├── skills/                # 技能文档目录
+│   ├── create-tbox-audio-app.md   # 音频应用开发技能
+│   ├── create-tbox-hello-world.md # Hello World 应用开发技能
+│   └── tbox-cross-compile.md      # 交叉编译技能（当前文件）
+├── src/                   # 源码目录
+│   ├── tbox/              # TBOX 库源码
+│   ├── demo/              # 示例应用
+│   └── hello/             # Hello World 应用示例
+└── out/                   # 编译输出软链接
 ```
-
-## 常用编译模式
-
-```bash
-# 调试模式
-xmake f -p linux -a arm --toolchain=myarm -m debug
-xmake
-
-# 最小化模式（适合嵌入式）
-xmake f -p linux -a arm --toolchain=myarm --small=y
-xmake
-
-# 微型模式（仅微内核，约64K）
-xmake f -p linux -a arm --toolchain=myarm --micro=y
-xmake
-```
-
-## 清理构建
-
-```bash
-# 清理所有配置和编译文件
-xmake c -a
-```
-
-## 验证文件架构
-
-使用 `file` 命令验证编译产物的架构：
-
-```bash
-file build/linux/arm/release/demo
-file build/linux/arm/release/libtbox.a
-```
-
-预期输出（ARM 32位）：
-```
-demo: ELF 32-bit LSB shared object, ARM, EABI5 version 1 (SYSV)
-```
-
-## 后处理配置
-
-在 `src/tbox/xmake.lua` 和 `src/demo/xmake.lua` 中添加后处理钩子，自动创建软链接：
-
-```lua
-after_build(function (target)
-    import("lib.detect.find_tool")
-    local ln = find_tool("ln")
-    if ln then
-        local outdir = path.join(os.projectdir(), "out")
-        os.mkdir(outdir)
-        local targetfile = path.absolute(target:targetfile())
-        local linkfile = path.join(outdir, path.filename(targetfile))
-        os.tryrm(linkfile)
-        os.vrunv(ln.program, {"-sf", targetfile, linkfile})
-        print("已软链接到: " .. linkfile)
-    end
-end)
-```
-
-## 日常开发工作流
-
-1. 修改源代码
-2. 运行 `./deploy.sh` 一键编译部署
-3. SSH 登录目标机器测试
-4. 重复以上步骤
-
-## 参考资料
-
-- [TBOX 在线文档](https://docs.tboox.top)
-- [TBOX GitHub](https://github.com/tboox/tbox)
-- [XMake 构建工具](https://github.com/xmake-io/xmake)

@@ -1,9 +1,14 @@
-
 # TBOX 项目中创建 Hello World 应用技能
 
 ## 概述
 
 本技能说明如何在 TBOX 项目中创建一个简单的 Hello World 应用程序。
+
+## 重要平台说明
+
+**关键信息：** 当前项目的目标平台(target)是ARM架构的32位平台，但编译宿主机(host)是x86_64平台。
+因此，所有编译产出的二进制文件都是针对ARM 32位架构的，不能在x86_64编译主机上直接运行。
+请勿在编译完成后尝试直接运行生成的可执行文件，因为它们不兼容当前编译主机架构。
 
 ## 项目结构
 
@@ -89,7 +94,17 @@ end
 includes("hello/xmake.lua")
 ```
 
-## 编译和运行
+## 交叉编译
+
+### 配置 ARM 32位平台交叉编译环境
+
+```bash
+# 配置交叉编译环境，目标平台为ARM 32位
+xmake f -p linux -a arm --toolchain=myarm
+
+# 或者使用更具体的参数
+xmake f -p cross -a arm -m release --sdk=/path/to/arm/toolchain
+```
 
 ### 编译应用
 
@@ -97,52 +112,10 @@ includes("hello/xmake.lua")
 xmake build hello
 ```
 
-### 运行应用
+## 部署到目标平台
 
-```bash
-xmake run hello
-```
+由于编译产出的是ARM 32位架构的二进制文件，需要将其部署到ARM 32位平台上才能运行：
 
-## 编译输出
-
-- **实际编译文件**：`build/linux/{arch}/release/hello`
-- **软链接**：`out/hello`（方便访问）
-
-## 切换架构编译
-
-如果需要切换架构（如从 arm 切换到 x86_64）：
-
-```bash
-# 切换到 x86_64 架构
-xmake f -a x86_64
-
-# 重新编译
-xmake build hello
-
-# 运行
-xmake run hello
-```
-
-## 清理构建
-
-```bash
-xmake c -a
-```
-
-## 常用命令总结
-
-| 命令 | 说明 |
-|------|------|
-| `xmake build hello` | 编译 hello 应用 |
-| `xmake run hello` | 运行 hello 应用 |
-| `xmake f -a {arch}` | 配置目标架构 |
-| `xmake c -a` | 清理所有构建文件 |
-| `xmake show` | 查看当前项目配置 |
-
-## 注意事项
-
-1. **目录结构**：保持应用在 `src/` 目录下，与 `demo`、`tbox` 同级
-2. **构建配置**：每个应用需要自己的 `xmake.lua`
-3. **依赖关系**：使用 `add_deps("tbox")` 确保 TBOX 库被正确链接
-4. **初始化与清理**：使用 `tb_init()` 初始化 TBOX，`tb_exit()` 清理资源
-5. **输出函数**：使用 `tb_printf()` 替代标准 C 的 `printf()`
+1. 将编译产出的可执行文件复制到ARM 32位目标设备
+2. 确保目标设备有必要的依赖库
+3. 在目标设备上运行应用

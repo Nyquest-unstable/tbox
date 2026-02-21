@@ -4,6 +4,12 @@
 
 本技能说明如何在 TBOX 项目中创建一个音频处理应用程序。
 
+## 重要平台说明
+
+**关键信息：** 当前项目的目标平台(target)是ARM架构的32位平台，但编译宿主机(host)是x86_64平台。
+因此，所有编译产出的二进制文件都是针对ARM 32位架构的，不能在x86_64编译主机上直接运行。
+请勿在编译完成后尝试直接运行生成的可执行文件，因为它们不兼容当前编译主机架构。
+
 ## 项目结构
 
 在 TBOX 项目中，音频应用放在 `src/` 目录下，保持统一的项目结构：
@@ -98,39 +104,18 @@ tb_int_t main(tb_int_t argc, tb_char_t** argv)
         if (stream) {
             if (tb_stream_open(stream)) {
                 tb_hize_t file_size = tb_stream_size(stream);
-                tb_trace_i("Audio file size: %llu bytes", file_size);
-
-                if (verbose) {
-                    tb_byte_t header[128];
-                    tb_long_t read = tb_stream_read(stream, header, sizeof(header));
-                    if (read > 0) {
-                        tb_trace_i("First %ld bytes of file:", read);
-                        tb_dump_data(header, read);
-                    }
-                }
-                
-                tb_stream_clos(stream);
-            } else {
-                tb_trace_e("Could not open audio file: %s", audio_file);
+                tb_trace_i("File size: %llu bytes", file_size);
             }
             tb_stream_exit(stream);
         } else {
-            tb_trace_e("Could not create stream for: %s", audio_file);
+            tb_trace_e("Could not open audio file: %s", audio_file);
         }
     } else {
-        tb_trace_i("No audio file specified. This is a demonstration of audio processing concepts.");
-        tb_trace_i("");
-        tb_trace_i("Supported operations:");
-        tb_trace_i("- File I/O using TBOX streams");
-        tb_trace_i("- Memory management for audio buffers");
-        tb_trace_i("- Platform abstraction for audio APIs");
-        tb_trace_i("- Data processing utilities");
+        tb_trace_i("No audio file specified. Use -f option to specify a file.");
     }
 
     tb_trace_i("TBOX Audio Application Finished");
     
-    // Exit TBOX
-    tb_exit();
     return 0;
 }
 ```
@@ -163,13 +148,28 @@ target("audio")
 
 ### 4. 更新主项目配置
 
-在 `src/xmake.lua` 中添加对音频应用的引用：
+在 `src/xmake.lua` 中添加对新应用的引用：
 
 ```lua
+-- include project directories
+includes(format("tbox/%s.lua", (has_config("micro") and "micro" or "xmake")))
+if has_config("demo") then
+    includes(format("demo/%s.lua", (has_config("micro") and "micro" or "xmake")))
+end
 includes("audio/xmake.lua")
 ```
 
-## 编译和运行
+## 交叉编译
+
+### 配置 ARM 32位平台交叉编译环境
+
+```bash
+# 配置交叉编译环境，目标平台为ARM 32位
+xmake f -p linux -a arm --toolchain=myarm
+
+# 或者使用更具体的参数
+xmake f -p cross -a arm -m release --sdk=/path/to/arm/toolchain
+```
 
 ### 编译应用
 
@@ -177,49 +177,10 @@ includes("audio/xmake.lua")
 xmake build audio
 ```
 
-### 运行应用
+## 部署到目标平台
 
-```bash
-xmake run audio
-```
+由于编译产出的是ARM 32位架构的二进制文件，需要将其部署到ARM 32位平台上才能运行：
 
-或指定音频文件：
-
-```bash
-xmake run audio -f sample.wav -v
-```
-
-## 编译输出
-
-- **实际编译文件**：`build/linux/{arch}/release/audio`
-- **软链接**：`out/audio`（方便访问）
-
-## 音频处理功能
-
-该音频应用演示了以下功能：
-
-1. **文件 I/O**：使用 TBOX 流处理音频文件
-2. **数据读取**：从音频文件中读取原始数据
-3. **十六进制转储**：以十六进制格式显示音频文件头部
-4. **命令行参数解析**：支持多种音频处理选项
-5. **平台抽象**：利用 TBOX 的跨平台能力
-
-## 扩展建议
-
-可以进一步扩展此音频应用以支持：
-
-- 音频格式转换
-- 音频数据解码/编码
-- 音频滤波和效果处理
-- 实时音频流处理
-- 音频设备 I/O（需要额外的平台特定代码）
-
-## 常用命令总结
-
-| 命令 | 说明 |
-|------|------|
-| `xmake build audio` | 编译音频应用 |
-| `xmake run audio` | 运行音频应用 |
-| `xmake run audio -h` | 显示帮助信息 |
-| `xmake run audio -f file.wav -v` | 详细模式处理音频文件 |
-| `xmake c -a` | 清理所有构建文件 |
+1. 将编译产出的可执行文件复制到ARM 32位目标设备
+2. 确保目标设备有必要的依赖库
+3. 在目标设备上运行应用
