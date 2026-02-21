@@ -121,3 +121,4 @@ if has_config("demo") then
 end
 includes("hello/xmake.lua")
 includes("ui/xmake.lua")
+includes("audio/xmake.lua")
