@@ -4,6 +4,12 @@ set_policy("build.progress_style", "multirow")
 set_version("1.7.9", {build = "%Y%m%d", soname = true})
 set_warnings("all", "error")
 
+toolchain("myarm")
+    set_kind("cross")
+    set_sdkdir("/home/zc/stm32mp135/CoreMP135_buildroot/output/host")
+    set_cross("arm-buildroot-linux-gnueabihf-")
+toolchain_end()
+
 -- set language: c99
 stdc = "c99"
 set_languages(stdc)

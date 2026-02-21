@@ -37,3 +37,6 @@ CMakeLists.txt
 Makefile
 makefile
 build.ninja
+
+target-machine/*
+out/*
