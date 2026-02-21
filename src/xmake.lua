@@ -120,3 +120,4 @@ if has_config("demo") then
     includes(format("demo/%s.lua", (has_config("micro") and "micro" or "xmake")))
 end
 includes("hello/xmake.lua")
+includes("ui/xmake.lua")
