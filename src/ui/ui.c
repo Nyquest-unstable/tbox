@@ -9,13 +9,19 @@
 tb_int_t main(tb_int_t argc, tb_char_t** argv)
 {
     tb_printf("TBOX UI应用启动...\n");
-#ifndef TB_CONFIG_PACKAGE_HAVE_LVGL
-    // 原有背光控制代码
-    backlight_t bl;
 
+    // 初始化TBOX
     if (!tb_init(tb_null, tb_null)) {
         return -1;
     }
+
+#ifdef TB_CONFIG_PACKAGE_HAVE_LVGL
+    tb_printf("LVGL功能已启用，需要配置显示驱动\n");
+    tb_printf("提示：目前项目尚未实现LVGL驱动移植代码\n");
+#endif
+
+    // 背光控制代码（无论是否启用LVGL都保留）
+    backlight_t bl;
 
     tb_printf("UI应用启动...\n");
 
@@ -54,32 +60,6 @@ tb_int_t main(tb_int_t argc, tb_char_t** argv)
     }
 
     backlight_exit(&bl);
-#else
-    // LVGL演示代码
-    if (!tb_init(tb_null, tb_null)) {
-        tb_printf("初始化TBOX失败\n");
-        return -1;
-    }
-
-    tb_printf("UI应用启动 (LVGL模式)...\n");
-
-    // 初始化LVGL
-    lv_init();
-
-    tb_printf("LVGL初始化成功\n");
-    
-    // 这里可以添加具体的LVGL GUI代码
-    // 创建一个简单的标签作为演示
-    lv_obj_t* label = lv_label_create(lv_scr_act());
-    lv_label_set_text(label, "Hello LVGL with TBOX!");
-    lv_obj_align(label, LV_ALIGN_CENTER, 0, 0);
-
-    tb_printf("已创建LVGL标签\n");
-    tb_printf("LVGL演示运行成功!\n");
-
-    // 清理资源
-    lv_deinit();
-#endif
 
     tb_exit();
     return 0;
