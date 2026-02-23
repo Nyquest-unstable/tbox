@@ -39,7 +39,7 @@ target("tbox")
     end
 
     -- add packages
-    for _, name in ipairs({"mbedtls", "polarssl", "openssl", "pcre2", "pcre", "zlib", "mysql", "sqlite3"}) do
+    for _, name in ipairs({"mbedtls", "polarssl", "openssl", "pcre2", "pcre", "zlib", "mysql", "sqlite3", "lvgl"}) do
         add_packages(name)
         if has_package(name) then
             set_configvar("TB_CONFIG_PACKAGE_HAVE_" .. name:upper(), 1)

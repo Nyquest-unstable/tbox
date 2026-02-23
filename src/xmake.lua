@@ -91,7 +91,7 @@ for _, name in ipairs({"xml", "zip", "hash", "regex", "object", "charset", "data
 end
 
 -- define options for package
-for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedtls", "pcre2", "pcre"}) do
+for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedtls", "pcre2", "pcre", "lvgl"}) do
     option(name)
         add_deps("small", "micro")
         set_default(true)
@@ -106,8 +106,8 @@ for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedt
 end
 
 -- add requires
-local groups = {nil, nil, nil, "ssl", "ssl", "ssl", "pcre", "pcre"}
-for idx, require_name in ipairs({"zlib", "sqlite3", "mysql", "mbedtls 2.13.*", "openssl 1.1.*", "polarssl", "pcre2", "pcre"}) do
+local groups = {nil, nil, nil, "ssl", "ssl", "ssl", "pcre", "pcre", "lvgl"}
+for idx, require_name in ipairs({"zlib", "sqlite3", "mysql", "mbedtls 2.13.*", "openssl 1.1.*", "polarssl", "pcre2", "pcre", "lvgl"}) do
     local name = require_name:split('%s')[1]
     if has_config(name) then
         add_requires(require_name, {optional = true, group = groups[idx]})

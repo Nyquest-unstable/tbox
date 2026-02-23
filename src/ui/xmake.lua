@@ -5,6 +5,13 @@ target("ui")
     set_kind("binary")
     add_files("ui.c", "backlight.c")
 
+    -- 添加LVGL支持
+    add_options("lvgl")
+    if has_config("lvgl") then
+        add_packages("lvgl")
+        add_defines("TB_CONFIG_PACKAGE_HAVE_LVGL")
+    end
+
     after_build(function (target)
         import("lib.detect.find_tool")
         local ln = find_tool("ln")
