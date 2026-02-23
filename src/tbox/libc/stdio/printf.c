@@ -45,6 +45,9 @@ tb_long_t tb_printf(tb_char_t const* format, ...)
     // print it
     tb_print(line);
 
+    // sync output
+    tb_print_sync();
+
     // ok?
     return size;
 }

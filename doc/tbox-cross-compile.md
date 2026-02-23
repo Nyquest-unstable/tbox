@@ -28,7 +28,7 @@ toolchain_end()
 
 ```bash
 # 配置交叉编译，目标平台为ARM 32位
-xmake f -p linux -a arm --toolchain=myarm
+xmake f -p linux -a arm --toolchain=myarm --lvgl=y
 
 # 编译
 xmake

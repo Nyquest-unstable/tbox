@@ -91,7 +91,7 @@ for _, name in ipairs({"xml", "zip", "hash", "regex", "object", "charset", "data
 end
 
 -- define options for package
-for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedtls", "pcre2", "pcre", "lvgl"}) do
+for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedtls", "pcre2", "pcre"}) do
     option(name)
         add_deps("small", "micro")
         set_default(true)
@@ -105,13 +105,26 @@ for _, name in ipairs({"zlib", "mysql", "sqlite3", "openssl", "polarssl", "mbedt
     option_end()
 end
 
+-- lvgl 独立选项，不受 small 和 micro 模式限制
+option("lvgl")
+    set_default(true)
+    set_showmenu(true)
+    set_description("Enable the lvgl package.")
+option_end()
+
 -- add requires
-local groups = {nil, nil, nil, "ssl", "ssl", "ssl", "pcre", "pcre", "lvgl"}
-for idx, require_name in ipairs({"zlib", "sqlite3", "mysql", "mbedtls 2.13.*", "openssl 1.1.*", "polarssl", "pcre2", "pcre", "lvgl"}) do
-    local name = require_name:split('%s')[1]
+local groups = {nil, nil, nil, "ssl", "ssl", "ssl", "pcre", "pcre"}
+for idx, require_name in ipairs({"zlib", "sqlite3", "mysql", "mbedtls 2.13.*", "openssl 1.1.*", "polarssl", "pcre2", "pcre"}) do
+    local parts = require_name:split('%s')
+    local name = parts[1]
     if has_config(name) then
         add_requires(require_name, {optional = true, group = groups[idx]})
     end
+end
+
+-- 添加 lvgl 包（独立添加）
+if has_config("lvgl") then
+    add_requires("lvgl", {optional = true, group = "lvgl"})
 end
 
 -- include project directories
