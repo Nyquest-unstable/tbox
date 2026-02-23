@@ -28,7 +28,7 @@
  * macros
  */
 #ifdef TB_ASSEMBLER_IS_GAS
-//#     define TB_LIBC_STRING_IMPL_MEMMOV
+#   define TB_LIBC_STRING_IMPL_MEMMOV
 #endif
 
 /* //////////////////////////////////////////////////////////////////////////////////////
